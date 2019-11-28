@@ -1,0 +1,7 @@
+<app-image-display [clickable]="true" [icon]="icon" (click)="selecting=true"> </app-image-display>
+<div class="outer" *ngIf="selecting" (click)="selecting=false">
+<div class="imagePicker" (click)="$event.stopPropagation();">
+  <h3>Seleziona un'icona <span class="glyphicon glyphicon-remove" (click)="selecting=false"></span></h3>
+  <img (click)="select(i)" *ngFor="let src of icons; let i=index" src="{{src}}" alt="{{src}}">
+</div>
+</div>

@@ -1,0 +1,104 @@
+<button *ngIf="!isPublic" class="btn btn-info" [class.activeAction]="recovering" (click)="recover()"><span class="glyphicon glyphicon-trash"></span></button>
+<span class="dropdown" *ngIf="!recovering">
+  <button (click)="ordering=!ordering" class="btn btn-info dropdown-toggle" type="button"><span class="glyphicon glyphicon-th-list"></span>
+  <!-- <span class="caret"></span> -->
+</button>
+  <ul class="dropdown-menu" *ngIf="ordering">
+    <li [class.downArrow]="orderingBy == -1 && orderDesc" [class.upArrow]="orderingBy == -1 && !orderDesc" [class.selected]="orderingBy == -1" (click)="orderBy(-1)">Ultimo aggiunto</li>
+    <li [class.downArrow]="orderingBy == field.id && !orderDesc" [class.upArrow]="orderingBy == field.id && orderDesc" [class.selected]="orderingBy == field.id" *ngFor="let field of baseElement" (click)="orderBy(field.id)">{{field.name}}</li>
+  </ul>
+  <div class="coverAll" *ngIf="ordering" (click)="ordering=false;"></div>
+</span>
+<button *ngIf="!recovering" class="btn btn-info" (click)="zoomAll()"><span class="glyphicon" [class.glyphicon-zoom-in]="!zoomingAll" [class.glyphicon-zoom-out]="zoomingAll"></span></button>
+<button *ngIf="!recovering" class="btn btn-info" [class.activeAction]="searching" (click)="search()"><span class="glyphicon glyphicon-search"></span></button>
+<button *ngIf="!isPublic && !recovering" class="btn btn-info" [class.activeAction]="settingAll" (click)="setAll()"><span class="glyphicon glyphicon-pencil"></span></button>
+<button *ngIf="!isPublic && !recovering" class="btn btn-info" [class.activeAction]="adding" (click)="addClicked()"><span class="glyphicon glyphicon-plus"></span></button>
+<button *ngIf="adding || searching || settingAll" type="submit" (click)="cancel()" class="btn btn-danger pull-right">Annulla</button>
+<button *ngIf="searching" type="submit" (click)="filter()" class="btn btn-success pull-right">Applica Filtri</button>
+<button *ngIf="settingAll" type="submit" (click)="saveAll()" class="btn btn-success pull-right">Imposta tutti</button>
+<button *ngIf="adding" type="submit" (click)="saveElement()" class="btn btn-success pull-right">Salva</button>
+
+<form *ngIf="adding || searching || settingAll" (submit)="doAction()">
+  <div class="row" style="margin: 2px -5px;padding: 0 10px;">
+    <div class="editingInput" *ngFor="let field of baseElement; let i=index" [class.col-xs-6]="field.type===0 || field.type===3 || field.type===4" [class.col-xs-3]="field.type===2 || field.type===2">
+      <input *ngIf="searching || settingAll" type="checkbox" [(ngModel)]="enabled[i]" [ngModelOptions]="{standalone: true}" >
+      <label for="{{'field'+i}}">{{field.name}}</label>
+      <input *ngIf="field.type!=2" type="{{field.type == 0 ? 'text' :
+              field.type == 1 ? 'number' :
+              field.type == 3 ? 'date' :
+              field.type == 4 ? 'datetime-local' :
+              'text'
+              }}" [disabled]="(searching || settingAll) && !enabled[i]" [(ngModel)]="newElem.fields[i].value" [ngModelOptions]="{standalone: true}" id="{{'field'+i}}">
+      <input *ngIf="field.type==2" type="checkbox" (change)="newElem.fields[i].value=!newElem.fields[i].value" [checked]="newElem.fields[i].value"
+        class="" id="{{'field'+i}}" [disabled]="(searching || settingAll) && !enabled[i]">
+    </div>
+  </div>
+</form>
+<div *ngIf="!recovering && elementi.length==0">
+  <h3>Questa lista è vuota</h3>
+</div>
+<div *ngIf="!recovering">
+<div class="elementBox" *ngFor="let el of elementi | filterLista:filters | orderLista:orderingBy:orderDesc; let i=index">
+  <div class="row">
+    <div class="col-xs-9 col-sm-10">
+      <div class="row" *ngIf="!editing.get(el.id)">
+        <div class="{{getColumns(field)}}"
+          *ngFor="let field of el.fields" (click)="zooming.set(el.id,!zooming.get(el.id))">
+          <p [class.negativeBold]="ms.getSettings().negativeImportant" *ngIf="field!=null && (field.type==0 || field.type==1 || field.type==3 || field.type==4)" [class.textField]="(field.type==0 || field.type==4) && !zooming.get(el.id) && !getBaseElementById(field.id).important"><b style="font-size: smaller;">{{names[field.id]}}</b> {{field.value}}</p>
+          <p *ngIf="field!=null && field.type==2"><b>{{names[field.id]}}</b> <span class="glyphicon" [class.glyphicon-ok]="field.value" [class.glyphicon-remove]="!field.value"></span></p>
+        </div>
+      </div>
+      <form *ngIf="editing.get(el.id)" class="editForm">
+        <div *ngFor="let field of baseElement; let i=index">
+          <label for="{{'field'+i}}">{{names[field.id]}}</label>
+          <input *ngIf="field.type!=2" type="{{field.type == 0 ? 'text' :
+      field.type == 1 ? 'number' :
+      field.type == 3 ? 'date' :
+      field.type == 4 ? 'datetime-local' :
+      'text'
+      }}" [(ngModel)]="el.fields[i].value" [ngModelOptions]="{standalone: true}" id="{{'field'+i}}">
+          <input *ngIf="field.type==2" type="checkbox" (change)="changeCheck(el, i)" [checked]="el.fields[i]?el.fields[i].value:false"
+            class="" id="{{'field'+i}}">
+        </div>
+      </form>
+    </div>
+    <div class="col-xs-3 col-sm-2 iconsTopRight">
+      <div *ngIf="!editing.get(el.id)">
+        <span class="glyphicon" (click)="zooming.set(el.id,!zooming.get(el.id))" [class.glyphicon-zoom-in]="!zooming.get(el.id)" [class.glyphicon-zoom-out]="zooming.get(el.id)"></span>
+        <span *ngIf="!isPublic" class="glyphicon glyphicon-duplicate" (click)="addClicked(el.id)"></span>
+        <span *ngIf="!isPublic" class="glyphicon glyphicon-pencil" (click)="edit(el.id)"></span>
+        <span *ngIf="!isPublic" class="glyphicon glyphicon-trash" (click)="remove(el.id)"></span>
+      </div>
+      <div *ngIf="editing.get(el.id)">
+        <span class="glyphicon glyphicon-ok" (click)="save(el.id)"></span> Salva<br>
+        <span class="glyphicon glyphicon-remove" (click)="cancelEdit(el.id)"></span> Cancella
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div *ngIf="recovering && recoverElementi.length==0">
+  <h3>Nessun elemento da recuperare</h3>
+</div>
+
+<div *ngIf="recovering">
+<div class="elementBox" *ngFor="let el of recoverElementi; let i=index">
+  <div class="row">
+    <div class="col-xs-9 col-sm-10">
+      <div class="row">
+        <div class="{{getColumns(field)}}"
+          *ngFor="let field of el.fields">
+          <p [class.negativeBold]="ms.getSettings().negativeImportant" *ngIf="field!=null && (field.type==0 || field.type==1 || field.type==3 || field.type==4)" [class.textField]="(field.type==0 || field.type==4) && !getBaseElementById(field.id).important"><b style="font-size: smaller;">{{names[field.id]}}</b> {{field.value}}</p>
+          <p *ngIf="field!=null && field.type==2"><b>{{names[field.id]}}</b> <span class="glyphicon" [class.glyphicon-ok]="field.value" [class.glyphicon-remove]="!field.value"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-3 col-sm-2 iconsTopRight">
+      <div>
+        <span class="glyphicon glyphicon-repeat" (click)="recoverElement(el.id)"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

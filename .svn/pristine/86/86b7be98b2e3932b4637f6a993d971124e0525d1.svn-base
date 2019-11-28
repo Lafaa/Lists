@@ -1,0 +1,195 @@
+import { Component, OnInit } from '@angular/core';
+import { Field, ListaInfo, ServerResponse } from "../model";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ManagerService } from "../manager.service";
+import { ReactiveFormsModule, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-create-list',
+  templateUrl: './create-list.component.html',
+  styleUrls: ['./create-list.component.css']
+})
+export class CreateListComponent implements OnInit {
+  errorNumber: number = 0;
+  icon: number = 0;
+  private retry = true;
+  private error: { error: boolean, msg: string }[] = [];
+  adding: boolean = false;
+  idList = -1;
+  // listaInfo: ListaInfo = new ListaInfo();
+  private fieldTypes: string[] = [
+    'Testo',
+    'Numero',
+    'Check',
+    'Data',
+    'Data/Ora'
+  ];
+  listForm: FormGroup = new FormGroup({
+    'name': new FormControl('', this.notEmpty),
+    'desc': new FormControl('', this.notEmpty),
+    'fields': new FormArray([], this.oneFieldAtLeast)
+  });
+  fieldsTypeList: Array<number> = [];
+  fieldsIdList: Array<number> = [];
+  importantList: Array<boolean> = [];
+  fields = (<FormArray>this.listForm.get('fields'));
+
+  constructor(private ms: ManagerService, private router: Router, private activatedRoute: ActivatedRoute) { }
+
+  oneFieldAtLeast(fields: FormArray) {
+    if (fields.length === 0)
+      return { 'emptyFields': true };
+    return null;
+  }
+
+
+  notEmpty(field: FormControl): { [s: string]: boolean } {
+    if (field.value.trim() === '')
+      return { 'empty': true };
+    return null;
+  }
+
+  important(i:number){
+    this.importantList[i]=!this.importantList[i];
+  }
+
+  selectIcon(icon: number) {
+    this.icon = icon;
+  }
+
+  ngOnInit() {
+    if (this.activatedRoute.snapshot.params['editing'])
+      this.idList = this.activatedRoute.snapshot.params['editing'];
+
+    if (this.ms.liste.find(x => x.id == this.idList)) {
+      let listaInfo = this.ms.liste.find(l => l.id == this.activatedRoute.snapshot.params['editing']);
+      listaInfo.fields.forEach(field => {
+        (<FormArray>this.listForm.get('fields')).push(new FormControl(field.name, [this.notEmpty, this.differentFieldNames.bind(this)]));
+        this.fieldsTypeList.push(field.type);
+        this.fieldsIdList.push(field.id);
+        this.importantList.push(field.important);
+      })
+      this.icon = listaInfo.icon;
+      this.listForm.patchValue({
+        'name': listaInfo.name,
+        'desc': listaInfo.desc
+      });
+    }
+    else {
+      this.ms.tryToRecoverSession().then((data:any)=> {
+        if (!data)
+          this.router.navigate(['/']);
+        else if (this.retry) {
+          this.retry = false;
+          this.ngOnInit();
+        }
+      });
+    }
+  }
+
+  addField(type: number) {
+    this.adding = true;
+    (<FormArray>this.listForm.get('fields')).push(new FormControl(
+      '', [this.notEmpty, this.differentFieldNames.bind(this)]
+    ));
+    this.fieldsTypeList.push(type);
+    let newId = -1;
+    for (let i = 0; i < this.fieldsIdList.length; i++) {
+      if (this.fieldsIdList[i] > newId)
+        newId = this.fieldsIdList[i];
+    }
+    this.fieldsIdList.push(newId + 1);
+    this.importantList.push(false);
+  }
+
+  differentFieldNames(control: FormControl): { [s: string]: boolean } {
+    let count = 0;
+    (<FormArray>this.listForm.get('fields')).controls.forEach(field => {
+      if (field.value == control.value) {
+        count++;
+      }
+    });
+    if (count > 1)
+      return { 'duplicateFieldName': true };
+    return null;
+  }
+
+
+  saveList() {
+    let listaInfo: ListaInfo = new ListaInfo();
+    listaInfo.desc = this.listForm.get('desc').value.trim();
+    listaInfo.name = this.listForm.get('name').value.trim();
+    listaInfo.icon = this.icon;
+    listaInfo.id = this.idList;
+    (<FormArray>this.listForm.get('fields')).controls.forEach((field, i) => {
+      listaInfo.fields.push(new Field(this.fieldsTypeList[i], this.fieldsIdList[i], i, field.value, this.importantList[i]));
+    });
+    this.ms.saveList(listaInfo).subscribe((response:ServerResponse)=> {
+      if (response.esito === 0) {
+        this.ms.AlertEmitter.emit({ msg: 'Lista salvata!', color: 'lightgreen' });
+        if (this.idList === -1) {
+          listaInfo.id = response.data.idLista;
+          this.ms.liste.push(listaInfo);
+        }
+        else {
+          for (let i = 0; i < this.ms.liste.length; i++) {
+            if (this.ms.liste[i].id == this.idList) {
+              this.ms.liste[i] = listaInfo;
+              break;
+            }
+          }
+        }
+        this.router.navigate(['/home']);
+      }
+      else if (response.esito === 1) {
+        if (response.messaggio === 'SESSIONEXPIRED') {
+          this.ms.AlertEmitter.emit({ msg: 'Sessione scaduta, effettua di nuovo il login', color: 'red' });
+          this.router.navigate(['/']);
+        }
+      }
+    });
+  }
+
+  moveUp(i: number) {
+    if (i === 0)
+      return;
+    let tmp = (<FormArray>this.listForm.get('fields')).controls[i - 1];
+    let tmptype = this.fieldsTypeList[i - 1];
+    let tmpid = this.fieldsIdList[i - 1];
+    let tmpimp = this.importantList[i - 1];
+
+    (<FormArray>this.listForm.get('fields')).controls[i - 1] = (<FormArray>this.listForm.get('fields')).controls[i];
+    this.fieldsTypeList[i - 1] = this.fieldsTypeList[i];
+    this.fieldsIdList[i - 1] = this.fieldsIdList[i];
+    this.importantList[i - 1] = this.importantList[i];
+
+    (<FormArray>this.listForm.get('fields')).controls[i] = tmp;
+    this.fieldsTypeList[i] = tmptype;
+    this.fieldsIdList[i] = tmpid;
+    this.importantList[i] = tmpimp;
+
+  }
+  moveDown(i: number) {
+    if (i === (<FormArray>this.listForm.get('fields')).controls.length - 1)
+      return;
+    let tmp = (<FormArray>this.listForm.get('fields')).controls[i + 1];
+    let tmptype = this.fieldsTypeList[i + 1];
+    let tmpid = this.fieldsIdList[i + 1];
+    let tmpimp = this.importantList[i + 1];
+
+    (<FormArray>this.listForm.get('fields')).controls[i + 1] = (<FormArray>this.listForm.get('fields')).controls[i];
+    this.fieldsTypeList[i + 1] = this.fieldsTypeList[i];
+    this.fieldsIdList[i + 1] = this.fieldsIdList[i];
+    this.importantList[i + 1] = this.importantList[i];
+
+    (<FormArray>this.listForm.get('fields')).controls[i] = tmp;
+    this.fieldsTypeList[i] = tmptype;
+    this.fieldsIdList[i] = tmpid;
+    this.importantList[i] = tmpimp;
+  }
+  delete(i: number) {
+    (<FormArray>this.listForm.get('fields')).removeAt(i);
+
+  }
+
+}

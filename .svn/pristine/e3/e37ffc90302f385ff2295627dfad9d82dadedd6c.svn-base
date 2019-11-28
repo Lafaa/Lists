@@ -1,0 +1,22 @@
+<div class="homeContent">
+  <div *ngFor="let lista of liste; let i=index" class="lista">
+    <app-image-display [icon]="lista.icon"></app-image-display>    
+        
+    <div class="titleDesc">
+      <span class="glyphicon glyphicon-cog" *ngIf="lista.owned" (click)="editingList=lista.id;"></span>  
+      <h3>{{lista.name}}</h3>
+      <p>{{lista.desc}}</p>
+      <button class="btn btn-primary" [routerLink]="['vedi-lista',lista.id]">Vedi</button>
+      <button *ngIf="lista.owned" class="btn btn-success pull-left" [routerLink]="['new',lista.id]">Modifica</button>
+      <button class="btn btn-danger pull-right" (click)="deleteList(i)" *ngIf="lista.owned">Cancella</button>
+    </div>
+  
+  </div>
+  <div *ngIf="liste.length==0" style="text-align:center">
+    <h3>Non hai ancora creato una lista tua</h3>
+  </div>
+  <button class="btn btn-info" routerLink="new"><span class="glyphicon glyphicon-plus"></span> Nuova lista</button>
+  <button class="btn btn-warning" routerLink="recover-list"><span class="glyphicon glyphicon-share-alt"></span> Recupera lista</button>
+</div>
+
+<app-manage-permission [idLista]="editingList" (close)="editingList = undefined;" *ngIf="editingList"></app-manage-permission>

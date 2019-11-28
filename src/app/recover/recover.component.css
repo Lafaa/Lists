@@ -1,0 +1,62 @@
+h1 {
+    text-align: center;
+}
+
+i{
+    font-size: x-large;
+}
+
+.error{
+    color: red;
+    text-align: center;
+    font-weight: bold;
+}
+
+.container-fluid{
+    max-width: 500px;
+}
+
+.glyphicon-exclamation-sign{
+    color: blue;
+}
+.glyphicon-ok-sign{
+    color: green;
+}
+
+/* input {
+    display: block;
+    margin:10px auto;
+    width: 200px;
+    text-align: center;
+} */
+
+.form-control {
+    margin: auto;
+    width: 70%;
+}
+
+.form-control-feedback {
+    right: 15%;
+}
+
+.has-feedback .form-control {
+    padding-right: 25px;
+}
+
+.innerBlue {
+    height: 240px;
+}
+
+.innerBlueBigger{
+    height: 300px;
+}
+
+.pull-right{
+    right: 15%;
+    position: absolute;
+}
+
+.pull-left{
+    left: 15%;
+    position: absolute;
+}

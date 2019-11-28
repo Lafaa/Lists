@@ -1,0 +1,39 @@
+h1 {
+    text-align: center;
+}
+
+p{
+    color: red;
+    text-align: center;
+    font-weight: bold;
+}
+
+.form-control {
+    margin: auto;
+    width: 70%;
+}
+
+.form-control-feedback {
+    right: 15%;
+}
+
+.has-feedback .form-control {
+    padding-right: 25px;
+}
+
+.innerBlue {
+    height: 415px;
+}
+
+.pull-right{
+    right: 15%;
+    position: absolute;
+}
+
+.pull-left{
+    left: 15%;
+    position: absolute;
+}
+i{
+    font-size: x-large;
+}

@@ -1,0 +1,5 @@
+<p>
+  profile works!
+</p>
+<button class="btn btn-info" (click)="changing=true">Cambia Password</button>
+<app-change-password *ngIf="changing" (close)="changing=false"></app-change-password>

@@ -1,0 +1,43 @@
+.outer {    
+    top: 0;
+    left: 0;
+    background-color: rgba(134, 134, 134, 0.31);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+button {
+    margin: 0 10% 10px;
+}
+
+.managePermission{
+    border: 1px solid black;
+    border-radius: 20px;
+    position: relative;
+    margin: auto;
+    width: 80vw;
+    max-width: 700px;
+    top: 8vh;
+    min-width: 250px;
+    min-height: 410px;
+    background-color: white;
+    text-align: center;
+    box-shadow: #525252 0px 0px 20px; 
+}
+
+h4{
+    display:inline;
+    margin-right: 15px;    
+}
+
+@media screen and (max-width:425px){
+    .managePermission{
+        width: 95vw
+    }
+}
+
+p {
+    margin:0;
+}

@@ -1,0 +1,40 @@
+import { Pipe, PipeTransform } from '@angular/core';
+import { Elemento, FieldPopulated } from "../model";
+
+@Pipe({
+    name: 'filterLista',
+    pure: false
+})
+export class ListFilter implements PipeTransform {
+
+    transform(items: Elemento[], filters: FieldPopulated[], editingElement:number): Elemento[] {
+        if (!items || !filters) {
+            return items;
+        }
+        let ret: Elemento[] = [];
+        items.forEach(elemento => {
+            let valid = true;
+            for (let filter of filters) {
+                if (filter != null) {
+                    if (filter.type === 0 || filter.type === 4 || filter.type === 3) {
+                        let val: string = elemento.fields.find(x => x.id == filter.id).value;
+                        if (val.toLowerCase().indexOf(filter.value.toLowerCase()) === -1) {
+                            valid = false; break;
+                        }
+                    }
+                    else if (filter.type === 1 || filter.type === 2) {
+                        let fieldToTest = elemento.fields.find(x => x.id == filter.id);
+                        if (fieldToTest===undefined || fieldToTest.value != filter.value) {
+                            valid = false; break;
+                        }
+                    }
+                }
+            }
+            if (valid || elemento.id == editingElement) {
+                ret.push(elemento);
+            }
+        });
+        return ret;
+        
+    }
+}

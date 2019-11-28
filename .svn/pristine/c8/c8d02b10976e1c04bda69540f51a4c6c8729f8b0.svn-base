@@ -1,0 +1,18 @@
+<div class="allApp" (click)="hideNews($event)">  
+  <nav class="navbar navbar-default">
+  <ul class="nav navbar-nav firstNav">
+    <li routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><a><span class="glyphicon glyphicon-home"></span> Home</a></li>
+    <li routerLink="/home/world" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><a><span class="glyphicon glyphicon-globe"></span> Pubbliche</a></li>
+  </ul>
+  <ul class="nav navbar-nav secondNav">
+    <li (click)="showNewsButton($event)"><a><span class="glyphicon glyphicon-inbox"></span></a><span *ngIf="0>0" class="glyphicon glyphicon-asterisk"></span></li>
+    <li routerLink="/home/profile" routerLinkActive="active"><a><span class="glyphicon glyphicon-user"></span></a></li>
+    <li><a (click)="logOut()"><span class="glyphicon glyphicon-log-out"></span></a> </li>
+    <li routerLink="/home/settings" routerLinkActive="active"><a><span class="glyphicon glyphicon-cog"></span></a></li>
+  </ul>
+  <div *ngIf="showNews" class="news" (click)="blockEvent($event)">Qui andranno le notifiche</div>
+</nav>
+<div class="container-fluid">
+  <router-outlet></router-outlet>
+</div>
+</div>

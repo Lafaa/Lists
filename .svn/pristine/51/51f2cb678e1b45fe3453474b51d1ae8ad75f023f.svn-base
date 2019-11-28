@@ -1,0 +1,13 @@
+h1 {
+    text-align: center;
+}
+
+p{
+    color: red;
+    text-align: center;
+    font-weight: bold;
+}
+
+.container-fluid{
+    max-width: 500px;
+}

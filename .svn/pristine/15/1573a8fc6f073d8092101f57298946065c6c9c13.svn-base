@@ -1,0 +1,46 @@
+import { Component, OnInit } from '@angular/core';
+import { ManagerService } from '../manager.service';
+import { ListaInfo, ServerResponse } from '../model';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-world',
+  templateUrl: './world.component.html',
+  styleUrls: ['./world.component.css']
+})
+export class WorldComponent implements OnInit {
+
+  liste:Array<ListaInfo>=[];
+  private adding=false;
+  constructor(private ms:ManagerService, private router:Router) { 
+  }
+
+  ngOnInit() {
+    this.ms.getAllListe().subscribe((response:ServerResponse)=>{
+      if (response.esito === 0) {          
+        response.data.forEach(element => {
+          if(!this.liste.find(x => x.id == element.id)){
+            this.liste.push(new ListaInfo(JSON.parse(element.fields), element.nome, element.desc, element.icon, element.id))
+          }
+        });      
+      }
+    });
+  }
+
+  deleteList(i:number){
+    if (confirm('Sei sicuro di voler cancellare la lista '+this.liste[i].name+"?"))
+      this.ms.deleteList(i).subscribe((response:ServerResponse)=>{
+        if (response.esito===0){
+          this.ms.liste.splice(i,1);
+          this.ms.AlertEmitter.emit({msg:'Lista cancellata con successo', color:'lightblue'})
+        }
+        else if (response.esito===1){
+            if (response.messaggio === 'SESSIONEXPIRED'){
+              this.ms.sessioneScaduta();
+              this.router.navigate(['/']);
+            }
+          }
+      }); 
+  }
+
+}

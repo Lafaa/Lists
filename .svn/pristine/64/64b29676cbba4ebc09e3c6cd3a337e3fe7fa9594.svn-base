@@ -1,0 +1,42 @@
+div {
+    text-align: center;
+    position: fixed;
+    z-index: 2;
+    right: 0px;
+    left: 0px;
+    width: 35vw;
+    min-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: opacity 1s, top 1s;
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 10px 30px 10px 10px;
+    top:-150px;
+    box-shadow: grey 7px 7px;
+}
+
+span {
+    position: absolute;
+    font-size: 18px;
+    right: 10px;
+    top: 4px;
+    right: 4px;
+    color: #777;
+    transition: right .01s, top .01s;
+}
+span:hover{
+    color:black;
+}
+
+span:active {
+    top: 5px;
+    right: 3px;
+}
+
+p {
+    word-break: break-word;
+    margin:0;
+    text-shadow: white 0 0 35px;
+    font-weight: 700;
+}

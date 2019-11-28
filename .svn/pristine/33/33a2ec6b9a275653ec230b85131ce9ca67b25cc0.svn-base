@@ -1,0 +1,83 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ManagerService } from "../manager.service";
+import { ServerResponse, News } from '../model';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class HomeComponent implements OnInit {
+
+  showNews = false;
+  news : News[] = []; 
+  constructor(private ms: ManagerService, private router: Router) {
+  }
+
+  blockEvent(e:Event){
+    e.stopPropagation();
+  }
+
+  showNewsButton(e:Event){
+    this.showNews = true;
+    e.stopPropagation();
+
+  }
+
+  hideNews(e:Event){
+    if (this.showNews)
+      this.showNews = false;
+  }
+
+  ngOnInit() {
+    if (!this.ms.fromLogin && this.ms.getUser() === '')
+      this.ms.tryToRecoverSession().then((data:any)=> {
+        if (!data){
+          this.ms.sessioneScaduta();
+          this.ms.url = this.router.url;
+          this.router.navigate(['/']);
+        }
+        else{
+          this.getNews();
+        }
+          
+      });
+    else {
+      this.ms.getListe();
+      this.getNews();
+    }
+  }
+  getNews(){
+    this.ms.getNews().subscribe((response:ServerResponse)=>{
+      if (response.esito==0){
+        this.news = [];
+        response.data.forEach(element => {
+          this.news.push(new News(element.type, element.name, element.id));
+        });
+      }
+    })
+  }
+
+  logOut() {
+    if (confirm('Sicuro di voler uscire?')) {
+      this.ms.logout().subscribe((data:ServerResponse)=>{
+        localStorage.removeItem("session");
+        localStorage.removeItem("user");
+        this.ms.initSession();
+        this.router.navigate(['/']);
+      });      
+    }
+  }
+
+  settings() {
+    this.router.navigate(['/', 'home', 'settings']);
+  }
+
+  profile() {
+    this.router.navigate(['/', 'home', 'profile']);
+
+  }
+
+
+}

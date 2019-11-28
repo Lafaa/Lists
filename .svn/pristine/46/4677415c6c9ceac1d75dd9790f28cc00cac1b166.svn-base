@@ -1,0 +1,51 @@
+import { Component } from '@angular/core';
+import { ManagerService } from '../manager.service';
+import { ServerResponse } from '../model';
+
+@Component({
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
+})
+export class ProfileComponent {
+
+  display=false;
+  name:string="";
+  groups:string;
+  lists:string;
+  yours:boolean;
+  icon:number;
+
+  constructor(private ms: ManagerService) {
+    this.ms.ProfiloView.subscribe((username:string)=>{
+        this.name = username;
+        this.init();
+    })
+  }
+
+  selectIcon(icon: number){
+    this.icon = icon;
+    this.ms.saveAvatar(icon).subscribe();
+  }
+
+  close(event:Event){
+    this.display=false;
+  }
+  dontClose(event:Event){
+    event.stopPropagation(); 
+  }
+
+  init() {
+    this.yours = this.name === this.ms.getUser();
+    
+    this.ms.getUserInfos(this.name).subscribe((response:ServerResponse)=>{
+      if (response.esito===0){
+        this.groups = response.data.groups;
+        this.lists = response.data.lists;
+        this.icon = response.data.icon != null?response.data.icon : 0;
+        this.display = true;
+      }
+    });
+  }
+
+}

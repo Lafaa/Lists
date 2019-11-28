@@ -1,0 +1,31 @@
+<div class="allApp" (click)="hideNews($event)">  
+  <nav class="navbar navbar-default">
+  <ul class="nav navbar-nav firstNav">
+    <li routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><a><span class="glyphicon glyphicon-home"></span> Home</a></li>
+    <li routerLink="/home/world" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><a><span class="glyphicon glyphicon-globe"></span> Pubbliche</a></li>
+  </ul>
+  <ul class="nav navbar-nav secondNav">
+    <li (click)="showNewsButton($event)"><a><span class="glyphicon glyphicon-inbox"></span></a><span *ngIf="news.length>0" class="glyphicon glyphicon-asterisk"></span></li>
+    <li routerLink="/home/profile" routerLinkActive="active"><a><span class="glyphicon glyphicon-user"></span></a></li>
+    <li routerLink="/home/settings" routerLinkActive="active"><a><span class="glyphicon glyphicon-cog"></span></a></li>
+    <li><a (click)="logOut()"><span class="glyphicon glyphicon-log-out"></span></a> </li>
+  </ul>
+  <div *ngIf="showNews" class="newsBox" (click)="blockEvent($event)">
+    <div *ngFor="let n of news" class="news">
+      <p *ngIf="n.type=='r'">Invito in lettura per la lista {{n.name}}</p>
+      <p *ngIf="n.type=='w'">Invito in scrittura per la lista {{n.name}}</p>
+      <p *ngIf="n.type=='g'">Invito per il gruppo {{n.name}}</p>
+      <div class="newsAction"> 
+        <span class="glyphicon glyphicon-ok" (click)="accept(n)"></span>
+        <span class="glyphicon glyphicon-remove" (click)="reject(n)"></span>
+      </div>
+    </div>
+    <div class="news" *ngIf="news.length===0">
+      <p>Non hai notifiche!</p>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid">
+  <router-outlet></router-outlet>
+</div>
+</div>

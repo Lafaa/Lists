@@ -1,0 +1,94 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ManagerService } from '../manager.service';
+import { ServerResponse } from '../model';
+
+@Component({
+  selector: 'app-register',
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.css']
+})
+export class RegisterComponent implements OnInit {
+
+  title = 'Registrazione';
+  error = '';
+  registerForm: FormGroup;
+
+  // @Output() loginDone = new EventEmitter<void>();
+  constructor(private ms: ManagerService, private router: Router) { }
+
+  ngOnInit() {
+    this.registerForm = new FormGroup({
+      'username': new FormControl('', [Validators.required]),
+      'email': new FormControl('', [this.mailFormat, Validators.required]),
+      'password': new FormControl('', [Validators.required,Validators.minLength(5)]),
+      'password2': new FormControl('', [Validators.required, this.samePassword.bind(this)])
+    })
+  }
+
+  register() {
+    
+    let values = this.registerForm.value;
+    this.ms.register(values.username, values.password, values.email)
+      .subscribe ((data:ServerResponse)=>{
+        if (data.esito===0){
+          this.ms.setUser(values.username);
+          this.ms.AlertEmitter.emit({msg:'Registrazione avvenuta con successo!', color:'green'});
+          this.router.navigate(['/']);          
+        }
+        else{
+          if (data.messaggio==="USERNAMEINUSE")
+            this.error="Questo username risulta già registrato";
+          else if(data.messaggio==="EMAILINUSE")
+            this.error="Questa email risulta già registrata";
+          else 
+            this.error=data.messaggio;
+        }
+      });
+  }
+
+  back() {
+    this.router.navigate(['/']);
+  }
+
+  mailFormat(control: FormControl): { [s: string]: boolean } {
+    const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (control.value !== "" && (control.value.length <= 5 || !EMAIL_REGEXP.test(control.value))) {
+      return { "invalidEmail": true };
+    }
+    return null;
+  }
+
+  samePassword(control: FormControl): { [s: string]: boolean } {
+    if (this.registerForm && control.value!=='' && control.value !== this.registerForm.get('password').value)
+      return { 'differentPassword': true };
+    return null;
+  }
+
+  // usernameInUse(control:FormControl):Promise<any>{
+  //   const promise = new Promise<any>((resolve, reject)=>{
+  //     this.ms.checkUsername(control.value)
+  //       .subscribe((data:ServerResponse)=>{
+  //         if (data.esito===0)
+  //           resolve (null);
+  //         else
+  //           resolve({'usernameInUse':true});
+  //       });
+  //   });
+
+  //   return promise;
+  // }
+
+  checkUserExists(){
+    if (this.registerForm.get('username').value) {
+      this.ms.checkUsername(this.registerForm.get('username').value)
+      .subscribe((data:any) => {
+        if (data.esito ===1) {
+          this.registerForm.get('username').setErrors({ usernameInUse: true });
+        }
+      });
+    }
+  }
+
+}

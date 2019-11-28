@@ -1,0 +1,326 @@
+import { Component, OnInit } from '@angular/core';
+import { ManagerService } from '../manager.service';
+import { Elemento, FieldPopulated, Field, ServerResponse } from '../model';
+import { ActivatedRoute, Router } from "@angular/router";
+
+@Component({
+  selector: 'app-vedi-lista',
+  templateUrl: './vedi-lista.component.html',
+  styleUrls: ['./vedi-lista.component.css']
+})
+export class VediListaComponent implements OnInit {
+  settingAll: boolean;
+  retry: any = true;
+  order: number[] = [];
+  adding: boolean;
+  searching: boolean;
+  baseElement: Field[];
+  names: String[] = [];
+  elementi: Elemento[] = [];
+  zooming: Map<number, boolean> = new Map<number, boolean>();
+  editing: Map<number, boolean> = new Map<number, boolean>();
+  enabled: boolean[] = [];
+  private newElem: Elemento;
+  private indexLista: number;
+  private backUpElemento: Elemento;
+  zoomingAll = false;
+  filters: FieldPopulated[] = [];
+  ordering = false;
+  orderingBy = -1;
+  orderDesc = false;
+  isPublic:boolean=false;
+  constructor(private ms: ManagerService, private router: Router, private route: ActivatedRoute) { }
+
+  public orderBy(order: number) {
+    if (order === this.orderingBy)
+      this.orderDesc = !this.orderDesc;
+    else
+      this.orderDesc = false;
+    this.orderingBy = order;
+    this.ordering = false;
+  }
+
+  cancel() {
+    if (this.adding) {
+      this.adding = false;
+    }
+    else if (this.settingAll)
+      this.settingAll = false;
+    else { //searching?
+      this.searching = false;
+      this.filters = null;
+    }
+    for (let entry of Array.from(this.editing.entries())) {
+      this.editing.set(entry[0], false);
+    }
+    this.enabled.fill(false);
+  }
+
+  edit(i: number) {
+    if (this.adding || this.searching || this.settingAll)
+      this.cancel();
+    for (let entry of Array.from(this.editing.entries())) {
+      this.editing.set(entry[0], false);
+    }
+    let el = this.elementi.find(x => x.id == i);
+    this.backUpElemento = el.copy();
+    for (let j = 0; j < this.baseElement.length; j++) {
+      if (!el.fields.find(f => f.id == this.baseElement[j].id)) {
+        let val: any;
+        if (this.baseElement[j].type == 2)
+          val = false;
+        el.fields.push(new FieldPopulated(this.baseElement[j].type, this.baseElement[j].id, this.baseElement[j].order, val));
+      }
+    }
+    el.fields = el.fields.sort((f1, f2) => {
+      if (f1.order > f2.order)
+        return 1;
+      else
+        return -1;
+    });
+    this.editing.set(i, true);
+  }
+  save(i: number) {
+    this.editing.set(i, false);
+    this.ms.saveElement(this.indexLista, this.elementi.find(x => x.id == i)).subscribe((response: ServerResponse) => {
+    });
+  }
+  saveAll() {
+    let map: Map<number, number> = new Map<number, number>();
+    this.baseElement.forEach(element => {
+      map.set(element.id, element.order);
+    });
+    if (this.enabled.find(x => x == true)) {
+      this.elementi.forEach(el => {
+        el.fields.forEach(field => {
+          if (this.enabled[map.get(field.id)])
+            field.value = this.newElem.fields.find(x => x.id == field.id).value;
+        });
+      });
+      this.ms.saveAllElements(this.indexLista, this.elementi).subscribe(data=>{});
+    }
+
+    this.settingAll = false;
+  }
+
+  cancelEdit(i: number) {
+    this.editing.set(i, false);
+    for (let j = 0; j < this.elementi.length; j++) {
+      if (this.elementi[j].id == i) {
+        this.elementi[j] = this.backUpElemento;
+        break;
+      }
+    }
+
+  }
+  remove(i: number) {
+    if (confirm('Sei sicuro di voler cancellare l\'elemento?')) {
+      this.ms.removeElement(i, this.indexLista).subscribe((response: ServerResponse) => {
+        if (response.esito === 0) {
+          let j = 0;
+          for (j = 0; j < this.elementi.length; j++) {
+            if (this.elementi[j].id === i)
+              break;
+          }
+          this.elementi.splice(j, 1);
+        }
+        else if (response.esito === 1) {
+          if (response.messaggio === 'SESSIONEXPIRED') {
+            this.ms.sessioneScaduta();
+            this.ms.url = this.router.url;
+            this.router.navigate(['/']);
+          }
+        }
+      })
+    }
+  }
+
+  ngOnInit() {
+    this.indexLista = this.route.snapshot.params['idLista'];
+    if (this.ms.listePubbliche.find(x=>x.id==this.indexLista) && !this.ms.liste.find(x => x.id == this.indexLista))
+      this.isPublic = true;
+    if (this.ms.liste.find(x => x.id == this.indexLista) || this.isPublic) {
+      if (!this.isPublic)
+        this.baseElement = this.ms.liste.find(x => x.id == this.indexLista).fields;
+      else 
+        this.baseElement = this.ms.listePubbliche.find(x => x.id == this.indexLista).fields;
+      this.ms.getElements(this.indexLista, 0).subscribe((response: ServerResponse) => {
+        if (response.esito === 0 && response.data) {
+          let fieldNumber = this.baseElement.length;
+          for (let i = 0; i < fieldNumber; i++) {
+            this.names.push('');
+            this.order.push(-1);
+          };
+          this.baseElement.forEach(data => {
+            this.enabled.push(false);
+            this.names[data.id] = data.name;
+            this.order[data.id] = data.order;
+          })
+          response.data.forEach(element => {
+            let el = new Elemento(element.elId);
+            el.fields = [];
+            for (let i = 0; i < element.fields.length; i++) {
+              if (element.fields[i] != null)
+                el.fields[this.order[element.fields[i].idField]] = new FieldPopulated(element.fields[i].type,
+                  element.fields[i].idField, element.fields[i].order, element.fields[i].value);
+            };
+            this.elementi.push(el);
+            this.zooming.set(el.id, false);
+            this.editing.set(el.id, false);
+          });
+        }
+        else if (response.esito === 1) {
+          if (response.messaggio === 'SESSIONEXPIRED') {
+            this.ms.sessioneScaduta();
+            this.ms.url = this.router.url;
+            this.router.navigate(['/']);
+          }
+        }
+      });
+    }
+    else {
+      this.ms.tryToRecoverSession().then((data: any) => {
+        if (!data)
+          this.router.navigate(['/']);
+        else if (this.retry) {
+          this.retry = false;
+          this.ngOnInit();
+        }
+      });
+    }
+  }
+
+  getBaseElementById(i: number) {
+    return this.baseElement.find(x => x.id == i);
+  }
+
+  getColumns(field: FieldPopulated) {
+    let res = "";
+    if (this.baseElement.length < 3) {
+      if (field.type == 0)
+        res = "col-xs-12 col-sm-6";
+      else
+        res = "col-xs-6";
+    }
+    else if (this.baseElement.length === 3) {
+      if (field.type == 0)
+        res = "col-xs-12 col-sm-6";
+      else
+        res = "col-xs-6 col-sm-4";
+    }
+    else if (this.baseElement.length > 3) {
+      if (field.type == 0)
+        res = "col-xs-12 col-sm-6";
+      else
+        res = "col-xs-6 col-sm-3";
+    }
+    return res;
+  }
+
+  saveElement() {
+    this.adding = false;
+    let addedElement = this.newElem.copy();
+    addedElement.fields.forEach(field => {
+      if (field.type === 4 && field.value !== '')
+        field.value = this.getDateFormat(field.value);
+    });
+    this.ms.saveElement(this.indexLista, addedElement).subscribe((response: ServerResponse) => {
+      if (response.esito === 0) {
+        this.newElem.id = response.data.elementId;
+        this.elementi.unshift(this.newElem);
+        this.newElem = new Elemento(-1);
+      }
+      else if (response.esito === 1) {
+        if (response.messaggio === 'SESSIONEXPIRED') {
+          this.ms.sessioneScaduta();
+          this.ms.url = this.router.url;
+          this.router.navigate(['/']);
+        }
+      }
+    });
+  }
+  filter() {
+    let addedElement = this.newElem.copy();
+    let newFilters = [];
+    addedElement.fields.forEach(field => {
+      if (this.enabled[field.order])
+        newFilters.push(new FieldPopulated(field.type, field.id, 0, field.value));
+    });
+    this.filters = newFilters;
+  }
+
+
+  addClicked(index?: number) {
+
+    this.cancel();
+    if (index === undefined) {
+      this.newElem = new Elemento();
+      this.baseElement.forEach(elem => {
+        if (elem.type == 2)
+          this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order, false));
+        else
+          this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order));
+      });
+    }
+    else {
+      this.newElem = this.elementi.find(el => el.id == index).copy();
+      this.newElem.id = -1;
+      this.baseElement.forEach(elem => {
+        if (this.newElem.fields.find(field => field.id === elem.id) === undefined) {
+          if (elem.type == 2)
+            this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order, false));
+          else
+            this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order));
+        } else {
+          this.enabled[elem.order] = true;
+        }
+      });
+      window.scrollTo(0, 0);
+    }
+
+    this.adding = true;
+  }
+
+  search() {
+    this.cancel();
+    this.newElem = new Elemento();
+    this.baseElement.forEach(elem => {
+      if (elem.type == 2)
+        this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order, false));
+      else
+        this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order));
+    });
+    this.searching = true;
+  }
+
+
+  setAll() {
+    this.cancel();
+    this.newElem = new Elemento();
+    this.baseElement.forEach(elem => {
+      if (elem.type == 2)
+        this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order, false));
+      else
+        this.newElem.fields.push(new FieldPopulated(elem.type, elem.id, elem.order));
+    });
+    this.settingAll = true;
+  }
+
+  zoomAll() {
+    for (let entry of Array.from(this.zooming.entries())) {
+      this.zooming.set(entry[0], !this.zoomingAll);
+    }
+    this.zoomingAll = !this.zoomingAll;
+  }
+
+  getDateFormat(value: string): string {
+    let date = new Date(value);
+    let ret = '';
+    ret = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes();
+    return ret;
+  }
+  changeCheck(el: Elemento, i) {
+    el.fields[i].value = !el.fields[i].value;
+  }
+
+}

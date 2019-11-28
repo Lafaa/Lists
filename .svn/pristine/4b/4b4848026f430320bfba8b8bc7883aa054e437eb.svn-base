@@ -1,0 +1,111 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ManagerService } from "../manager.service";
+import { ServerResponse, News } from '../model';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class HomeComponent implements OnInit {
+
+  showNews = false;
+  news: News[] = [];
+  lockAccept = false;
+  constructor(private ms: ManagerService, private router: Router) {
+
+    this.ms.SessionExpiredEmitter.subscribe(() => {
+      localStorage.removeItem("session");
+      this.ms.AlertEmitter.emit({ msg: 'Sessione invalida, effettua di nuovo il login', color: 'red' });
+      if (this.router.url !== '/login')
+        this.ms.url = this.router.url;
+      this.router.navigate(['/']);
+    });
+  }
+
+  blockEvent(e: Event) {
+    e.stopPropagation();
+  }
+
+  showNewsButton(e: Event) {
+    this.showNews = !this.showNews;
+    e.stopPropagation();
+
+  }
+
+  hideNews(e: Event) {
+    if (this.showNews)
+      this.showNews = false;
+  }
+
+  accept(n: News) {
+    if (this.lockAccept)
+      return;
+    else
+      this.lockAccept = true;
+    this.ms.answerRequest(n.type, n.id, 'y').subscribe((response: ServerResponse) => {
+      if (response.esito == 0) {
+        this.ms.AlertEmitter.emit({ msg: 'Richiesta accettata!', color: 'green' });
+      }
+      this.lockAccept = false;
+    });
+  }
+
+  reject(n: News) {
+    if (this.lockAccept)
+      return;
+    else
+      this.lockAccept = true;
+    this.ms.answerRequest(n.type, n.id, 'n').subscribe((response: ServerResponse) => {
+      if (response.esito == 0) {
+        this.ms.AlertEmitter.emit({ msg: 'Richiesta rifiutata!', color: 'green' });
+      }
+      this.lockAccept = false;
+    });
+  }
+
+  ngOnInit() {
+    if (!this.ms.fromLogin && this.ms.getUser() === '')
+      this.ms.tryToRecoverSession().then((data: any) => {
+        if (data)
+          this.getNews();
+      });
+    else {
+      this.ms.getListe();
+      this.getNews();
+    }
+  }
+  getNews() {
+    this.ms.getNews().subscribe((response: ServerResponse) => {
+      if (response.esito == 0) {
+        this.news = [];
+        response.data.forEach(element => {
+          this.news.push(new News(element.type, element.name, element.id));
+        });
+      }
+    })
+  }
+
+  logOut() {
+    if (confirm('Sicuro di voler uscire?')) {
+      this.ms.logout().subscribe((data: ServerResponse) => {
+        localStorage.removeItem("session");
+        localStorage.removeItem("user");
+        this.ms.initSession();
+        this.router.navigate(['/']);
+      });
+    }
+  }
+
+  settings() {
+    this.router.navigate(['/', 'home', 'settings']);
+  }
+
+  profile() {
+    this.router.navigate(['/', 'home', 'profile']);
+
+  }
+
+
+}

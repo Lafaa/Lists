@@ -1,0 +1,64 @@
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router'
+import { ManagerService } from '../manager.service';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ServerResponse } from '../model';
+
+@Component({
+  selector: 'app-recover',
+  templateUrl: './recover.component.html',
+  styleUrls: ['./recover.component.css']
+})
+export class RecoverComponent implements OnInit {
+  recoverForm:FormGroup;
+  error = '';
+  loginError=false;
+  // @Output() loginDone = new EventEmitter<void>();
+  constructor(private ms: ManagerService, private router: Router) { }
+
+  ngOnInit(){
+    this.recoverForm = new FormGroup({
+      'email': new FormControl(this.ms.getUser(), [Validators.required, this.mailFormat])
+    });
+  }
+
+  back() {
+    this.router.navigate(['/']);
+  }
+
+  recover(){
+    let values = this.recoverForm.value;
+    this.ms.login(values.username, values.password).subscribe((response:ServerResponse)=>{
+      if (response.esito===0){
+          // this.loginDone.emit();
+          this.ms.setSessionId(response.data.sessionId);
+          this.ms.setUser(response.data.name);
+          this.router.navigate(['/home']);          
+      } else {
+        this.loginError=true;
+        switch (response.messaggio){
+          case 'WRONGPWD':
+                this.error = 'Password errata';
+                break;
+          case 'WRONGFIELD':
+                this.error = 'Utente sconosciuto';
+                break;
+          case 'TOOMANYTRIES':
+                this.error = 'Hai provato troppe volte, rallenta un po\'';
+                break;
+          default:
+                this.error = response.messaggio;
+        }
+      };
+    });
+  }
+
+  mailFormat(control: FormControl): { [s: string]: boolean } {
+    const EMAIL_REGEXP = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (control.value !== "" && (control.value.length <= 5 || !EMAIL_REGEXP.test(control.value))) {
+      return { "invalidEmail": true };
+    }
+    return null;
+  }
+
+}

@@ -1,0 +1,24 @@
+<div class="well well-lg">
+  <h1>Impostazioni</h1>
+  <div class="settings">
+    <table class="table" *ngIf="settings">
+      <colgroup>
+        <col width="80%">
+        <col width="20%">
+      </colgroup>
+      <tr style="border-top: none;">
+        <td>Inverti grassetto 
+          <br><small>Se abilitato, per i campi importanti apparirà in grassetto il contenuto e non il nome</small>
+        </td>
+        <td>
+          <app-switch [(value)]="settings.negativeImportant"></app-switch>
+        </td>
+      </tr>
+    </table>
+    <button class="btn btn-info" (click)="changing=true">Cambia Password</button>
+    <app-change-password *ngIf="changing" (close)="changing=false"></app-change-password>
+    <button class="btn btn-success" (click)="save()">Salva</button>
+    <button class="btn btn-warning" (click)="reset()">Annulla</button>
+
+  </div>
+</div>

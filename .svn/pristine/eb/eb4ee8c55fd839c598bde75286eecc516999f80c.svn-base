@@ -1,0 +1,22 @@
+<h1>
+    Recupera password
+  </h1>
+  <div class="container-fluid">
+    <form [formGroup]='recoverForm' (submit)="recover()">
+      <div class="form-group has-feedback">
+        <label >Email</label>
+        <input class="form-control" type="email" formControlName="email" placeholder="Email"/>
+        <i class="glyphicon form-control-feedback"
+        [appSelfFocus]='true'
+        [class.glyphicon-exclamation-sign]="recoverForm.get('email').pristine"
+        [class.glyphicon-ok-sign]="recoverForm.get('email').valid"
+        [class.glyphicon-remove-sign]="recoverForm.get('email').invalid && recoverForm.get('email').dirty"
+        ></i>
+        <p class="error" *ngIf="recoverForm.get('email').hasError('invalidEmail') && recoverForm.get('email').dirty">Formato email non valido</p>
+        <p class="error" *ngIf="recoverForm.get('email').hasError('required') && recoverForm.get('email').dirty">Devi inserire un indirizzo email</p>        
+      </div>
+      <p>Inserisci l'email con cui ti sei registrato per ricevere una nuova password</p>      
+      <button [disabled]="recoverForm.invalid" class="btn btn-primary pull-left">Conferma</button>
+    </form>
+    <button (click)="back()" class="btn btn-danger pull-right">Back</button>   
+</div>

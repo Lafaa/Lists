@@ -1,0 +1,21 @@
+<div class="outer" *ngIf="display" (click)="close($event)">
+<div class="box" (click)="dontClose($event)">
+  <div class="row">
+    <div class="col-xs-8">
+      <img src="http://hdwpro.com/wp-content/uploads/2017/01/3D-Cool-Image-380x250.jpg" alt="" />
+    </div>
+    <div class="col-xs-4">
+      <p>{{name}}</p>
+      <div *ngIf="yours">
+        
+      </div>
+    </div>
+
+  </div>
+
+  <p>Liste Pubbliche</p>
+  <div class="well">{{lists}}</div>
+  <p>Gruppi</p>
+  <div class="well">{{groups}}</div>
+</div>
+</div>

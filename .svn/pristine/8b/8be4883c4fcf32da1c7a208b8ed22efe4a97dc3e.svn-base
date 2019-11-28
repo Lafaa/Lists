@@ -1,0 +1,54 @@
+ul.nav {
+    cursor: pointer;
+}
+
+.firstNav {
+    margin-right: 140px;
+    display: -webkit-box;
+    overflow: auto;
+    padding-left: 20px;
+}
+
+.firstNav li{
+    float: initial!important;
+}
+
+.secondNav {
+    width: 140px; 
+    position: absolute; 
+    right: 15px;
+    top:0;
+}
+
+.secondNav li {
+    float:left!important;
+}
+
+/* ::-webkit-scrollbar { 
+    display: none; 
+} */
+
+li:focus{
+    outline: inherit;
+}
+
+.navbar{
+    margin-bottom: 5px;
+    min-width: 385px;
+}
+
+@media screen and (max-width:500px){
+    .nav>li>a{
+        padding:10px 5px;
+    }
+    .firstNav{
+        margin-right: 73px;
+    }
+    .secondNav{
+        width: 73px;
+
+    }
+}
+.container-fluid{    
+    min-width: 385px;
+}

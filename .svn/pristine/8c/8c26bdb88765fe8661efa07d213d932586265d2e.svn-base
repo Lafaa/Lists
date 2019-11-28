@@ -1,0 +1,276 @@
+import { Injectable, EventEmitter } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+// import { Observable } from 'rxjs/Observable';
+// import 'rxjs';
+import { ListaInfo, Elemento, Settings, UserInfo } from './model';
+import { VediListaComponent } from './vedi-lista/vedi-lista.component';
+
+@Injectable()
+export class ManagerService {
+
+  public AlertEmitter = new EventEmitter<{ msg: string, color: string }>();
+  // public ProfiloView = new EventEmitter<string>();
+  public listePubbliche: Array<ListaInfo> = new Array<ListaInfo>();
+  public url: string;
+  public userInfo: UserInfo;
+  // public dataLoaded = new Observable<boolean>();
+
+  fromLogin = false;
+  private sessionId;
+
+  private user;
+  private baseUrl = 'https://liste.davidetroise.it/ms/';
+  private credentialsUrl = 'credentials.php';
+  private listeUrl = 'liste.php';
+  private elementsUrl = 'elements.php'
+  private recoverUrl = 'old_.php'
+  public liste: Array<ListaInfo>;
+  private options: HttpHeaders;
+  private settings: Settings;
+
+
+  constructor(private http: HttpClient) {
+    this.options = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    this.initSession();
+  }
+
+  initSession(): any {
+    this.url = "";
+    this.sessionId = '';
+    this.user = '';
+    this.liste = [];
+    this.listePubbliche = [];
+  }
+
+  setSessionId(si: string) {
+    this.sessionId = si;
+    localStorage.setItem("session", si);
+  }
+
+  getSessionId() {
+    return this.sessionId;
+  }
+
+  getOldListe() {
+    return this.http.post(this.baseUrl + this.recoverUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&start=0',
+      { headers: this.options });
+  }
+
+  setUser(user: string) {
+    this.user = user;
+    localStorage.setItem("user", user);
+  }
+  getUser() {
+    return this.user;
+  }
+
+
+  register(username: string, password: string, email: string) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'user=' + username + '&pwd=' + password + '&email=' + email,
+      { headers: this.options });
+  }
+
+  getUserInfos(username: string) {
+
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&userToFind=' + username + '&user=' + this.getUser(),
+      { headers: this.options });
+  }
+
+  checkUsername(username: string) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'user=' + username,
+      { headers: this.options });
+
+  }
+
+  setSettings(s: Settings) {
+    this.settings = s;
+  }
+
+  saveSettings(s: Settings) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&settings=' + JSON.stringify(s),
+      { headers: this.options });
+  }
+
+  saveAvatar(icon: number) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&avatar=' + icon,
+      { headers: this.options });
+  }
+
+  getSettings() {
+    return this.settings;
+  }
+
+  logout() {
+    this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&logout=true',
+      { headers: this.options }).subscribe();
+    this.initSession();
+  }
+
+  sessioneScaduta() {
+    localStorage.removeItem("session");
+    this.AlertEmitter.emit({ msg: 'Sessione invalida, effettua di nuovo il login', color: 'red' });
+  }
+
+  login(username: string, password: string) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'user=' + username + '&pwd=' + password,
+      { headers: this.options })
+  }
+
+  getSettingsFromServer() {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&getSettings=true',
+      { headers: this.options })
+
+  }
+
+  ripristinaLista(id: number) {
+    return this.http.post(this.baseUrl + this.recoverUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&id=' + id,
+      { headers: this.options })
+
+  }
+
+  getListe(): boolean | Promise<boolean> {
+    if (this.liste.length !== 0)
+      return true;
+    return new Promise<boolean>((resolve) => {
+      this.http.post(this.baseUrl + this.listeUrl,
+        'sessionId=' + this.sessionId + '&user=' + this.user + '&start=0',
+        { headers: this.options })
+        .subscribe((data: any) => {
+          if (this.settings === undefined)
+            this.getSettingsFromServer().subscribe((response2: any) => {
+              if (response2.esito == 0)
+                this.setSettings(new Settings(response2.data));
+              let response = data;
+              if (response.esito === 0) {
+                response.data.forEach(element => {
+                  if (!this.liste.find(x => x.id == element.id)) {
+                    this.liste.push(new ListaInfo(JSON.parse(element.fields), element.nome, element.desc, element.icon, element.id, element.owner, element.likes))
+                    if (element.pub)
+                      this.listePubbliche.push(this.liste[this.liste.length - 1]);
+                  }
+                });
+                resolve(true);
+              }
+              else {
+                localStorage.removeItem("session");
+                localStorage.removeItem("user");
+                resolve(false);
+              }
+            });
+          else {
+            let response = data;
+            if (response.esito === 0) {
+              response.data.forEach(element => {
+                if (!this.liste.find(x => x.id == element.id)) {
+                  this.liste.push(new ListaInfo(JSON.parse(element.fields), element.nome, element.desc, element.icon, element.id, element.owner, element.likes))
+                  if (element.pub)
+                    this.listePubbliche.push(this.liste[this.liste.length - 1]);
+                }
+              });
+              resolve(true);
+            }
+            resolve(false);
+          }
+        });
+    });
+  }
+
+  getAllListe() {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&start=0&all=Y',
+      { headers: this.options });
+  }
+  voteList(id: number) {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&list=' + id,
+      { headers: this.options });
+  }
+
+  getListPermission(id: number) {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&id=' + id + '&perm=Y',
+      { headers: this.options });
+
+  }
+
+  getElements(id: number, start: number) {
+    return this.http.post(this.baseUrl + this.elementsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&idLista=' + id + '&start=' + start,
+      { headers: this.options });
+
+  }
+
+  changePwd(oldP: string, newP: string) {
+    return this.http.post(this.baseUrl + this.credentialsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.getUser() + '&pwd=' + oldP + '&newP=' + newP,
+      { headers: this.options });
+
+  }
+
+  saveElement(idLista: number, el: Elemento) {
+    return this.http.post(this.baseUrl + this.elementsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&json=' + JSON.stringify(el) + '&idLista=' + idLista,
+      { headers: this.options });
+  }
+  saveAllElements(idLista: number, el: Elemento[]) {
+    return this.http.post(this.baseUrl + this.elementsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&all=true&json=' + JSON.stringify(el) + '&idLista=' + idLista,
+      { headers: this.options });
+  }
+
+  removeElement(id: number, idLista: number) {
+    return this.http.post(this.baseUrl + this.elementsUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&id=' + id + '&idLista=' + idLista,
+      { headers: this.options });
+
+  }
+
+  saveList(lista: ListaInfo) {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&baseEl=' + JSON.stringify(lista) + (lista.id != -1 ? '&id=' + lista.id : ''),
+      { headers: this.options });
+
+  }
+
+  changeListPermissions(data: any, id: number) {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&newPerm=' + JSON.stringify(data) + '&id=' + id,
+      { headers: this.options });
+
+  }
+
+  deleteList(i: number) {
+    return this.http.post(this.baseUrl + this.listeUrl,
+      'sessionId=' + this.sessionId + '&user=' + this.user + '&id=' + this.liste[i].id,
+      { headers: this.options });
+
+  }
+
+  tryToRecoverSession() {
+    const promise: Promise<boolean> = new Promise((resolve, err) => {
+      let session = localStorage.getItem("session");
+      let user = localStorage.getItem("user");
+      if (session !== null && user !== null) {
+        this.sessionId = session;
+        this.user = user;
+        resolve(this.getListe());
+      }
+      else
+        resolve(false);
+    });
+    return promise;
+  }
+
+
+
+}

@@ -1,0 +1,8 @@
+<div class="outer" (click)="exit()">
+  <div class="changePwdForm" (click)="$event.stopPropagation();">
+    <h3>{{title}}</h3>
+    <p>{{answer}}</p>
+    <button class="btn">{{confirm}}</button>
+    <button class="btn">{{cancel}}</button>
+  </div>
+  </div>

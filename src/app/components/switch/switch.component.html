@@ -1,0 +1,7 @@
+<div style="position: absolute;" (click)="switch()">
+  <span class="outerSwitch">
+    <span class="innerSwitchR commonProperties" [class.switchedR]="value" [style.backgroundColor]="inactiveColor"></span>
+    <span class="innerSwitchL commonProperties" [class.switchedL]="value" [style.backgroundColor]="activeColor"></span>
+  </span>
+  <span class="innerSwitchM commonProperties" [class.switchedM]="value" [style.backgroundColor]="toggleColor"></span>
+</div>

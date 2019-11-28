@@ -1,0 +1,4 @@
+<div [style.backgroundColor]='alertColor' [style.top]="top" [style.opacity]="opacity">
+  <span (click)="closeImmediate()" class="glyphicon glyphicon-remove"></span>
+  <p>{{msg}}</p>
+</div>

@@ -1,0 +1,7 @@
+<div class="homeContent">
+  <div *ngFor="let lista of liste; let i=index" class="lista">
+    <h3>{{lista.name}}</h3>
+    <p>{{lista.desc}}</p>
+    <button class="btn btn-primary" (click)="ripristina(lista.id)">Ripristina</button>
+  </div>
+</div>

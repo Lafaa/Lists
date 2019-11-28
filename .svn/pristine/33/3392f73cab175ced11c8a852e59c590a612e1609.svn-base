@@ -1,0 +1,62 @@
+<h2 style="display:inline">Nuova Lista</h2>
+<button type="submit" (click)="saveList()" [disabled]="listForm.invalid" class="btn btn-success pull-right">Save</button>
+<form [formGroup]="listForm">
+  <br>
+  <div class="form-group">
+    <label for="name">Nome</label>
+    <input type="text" [appSelfFocus]=true class="form-control" formControlName="name" placeholder="Nome della lista">
+  </div>
+  <div class="form-group">
+    <label>Icona</label>
+    <app-image-picker [icon]="icon" (iconSelected)="selectIcon($event)"></app-image-picker>
+  </div>
+  <div class="form-group">
+    <label>Descrizione</label>
+    <textarea class="form-control" formControlName="desc" rows="2" placeholder="Inserisci qui la descrizione della tua lista"></textarea>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Elemento Predefinito</h3>
+    </div>
+    <div class="panel-body">
+      <p>Definisci qui come saranno formati gli elementi di questa lista. Utilizza i bottoni per aggiungere campi!</p>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <td>N.</td>
+          <td>Nome</td>
+          <td>Tipo</td>
+          <td>&nbsp;</td>
+        </tr>
+      </thead>
+      <tbody formArrayName='fields'>
+        <tr *ngFor="let field of fields.controls; let i=index">
+          <td>{{i}}</td>
+          <td><input type="text" class="form-control" [formControlName]="i" [appSelfFocus]="adding">
+            <td>{{fieldTypes[fieldsTypeList[i]]}}</td>
+            <td style="min-width:66px">
+              <span (click)="moveUp(i)" class="glyphicon glyphicon-arrow-up"></span>
+              <span (click)="moveDown(i)" class="glyphicon glyphicon-arrow-down"></span>
+              <span (click)="delete(i)" class="glyphicon glyphicon-trash"></span>
+              <span (click)="important(i)" [class.importantSelected]="importantList[i]" class="glyphicon glyphicon-pushpin"></span>
+            </td>
+            <div class="error-message">
+            </div>
+        </tr>
+      </tbody>
+    </table>
+    <div class="row" style="padding-right:3px; padding-left:3px">
+      <div class="col-xs-6 col-sm-2 col-sm-offset-1">
+        <button (click)="addField(0)" class="btn btn-default"><small><span class="glyphicon glyphicon-plus"></span></small> Testo</button></div>
+      <div class="col-xs-6 col-sm-2">
+        <button (click)="addField(1)" class="btn btn-default"><small><span class="glyphicon glyphicon-plus"></span></small> Numero</button></div>
+      <div class="col-xs-6 col-sm-2">
+        <button (click)="addField(2)" class="btn btn-default"><small><span class="glyphicon glyphicon-plus"></span></small> Check</button></div>
+      <div class="col-xs-6 col-sm-2">
+        <button (click)="addField(3)" class="btn btn-default"><small><span class="glyphicon glyphicon-plus"></span></small> Data</button></div>
+      <div class="col-xs-6 col-sm-2">
+        <button (click)="addField(4)" class="btn btn-default"><small><span class="glyphicon glyphicon-plus"></span></small> Data/Ora</button></div>
+    </div>
+  </div>
+</form>

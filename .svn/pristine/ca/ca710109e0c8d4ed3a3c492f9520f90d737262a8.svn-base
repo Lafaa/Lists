@@ -1,0 +1,14 @@
+  <div class="row">
+    <div class="col-xs-8">
+      <app-image-picker [big]="true" [icon]="userInfo.icon" (iconSelected)="selectIcon($event)"></app-image-picker>
+    </div>
+    <div class="col-xs-4">
+      <p>{{name}}</p>
+      <div *ngIf="yours">        
+      </div>
+    </div>
+  </div>
+  <p>Liste Pubbliche</p>
+  <div class="well">{{userInfo.lists}}</div>
+  <p>Gruppi</p>
+  <div class="well">{{userInfo.groups}}</div>

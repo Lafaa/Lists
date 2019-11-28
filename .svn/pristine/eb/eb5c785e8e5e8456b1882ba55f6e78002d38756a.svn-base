@@ -1,0 +1,53 @@
+    .outerSwitch {
+        width: 50px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        height: 30px;
+        border: 1px solid #dfdfdf;
+        border-radius: 15px;
+        display: block;
+        position: relative;
+    }
+    
+    
+    .innerSwitchR {
+        width: 50px;
+        display: block;
+        height: 30px;
+        left: 0;
+        position: absolute;
+        transition: left 0.5s;
+    }    
+    .switchedR{
+        left:50px;
+    }
+    
+    .innerSwitchL {
+        width: 50px;
+        display: block;
+        height: 30px;
+        position: absolute;
+        left: -60px;
+        transition: left 0.5s;
+    }
+    .switchedL{
+        left:0;
+    }
+
+    
+    .innerSwitchM {
+        height: 30px;
+        width: 30px;
+        display: block;
+        top: 0;
+        left: -5px;
+        z-index: 5;
+        position: absolute;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        transition: left 0.5s;
+    }
+
+    .switchedM {
+        left:25px;
+    }

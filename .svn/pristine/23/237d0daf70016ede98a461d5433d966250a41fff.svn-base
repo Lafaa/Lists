@@ -1,0 +1,66 @@
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { ManagerService } from './manager.service';
+import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
+import { LoginComponent } from './login/login.component';
+import { ListsComponent } from './lists/lists.component';
+import { AppRoutingModule } from "./app-routing-module";
+import { CreateListComponent } from './create-list/create-list.component';
+import { SelfFocusDirective } from './self-focus.directive';
+import { VediListaComponent } from './vedi-lista/vedi-lista.component';
+import { NiceAlertComponent } from './nice-alert/nice-alert.component';
+import { RegisterComponent } from './register/register.component';
+import { RecoverComponent } from './recover/recover.component';
+import { SettingsComponent } from './settings/settings.component';
+import { ListFilter } from "./vedi-lista/vedi-lista.pipe";
+import { ReactiveFormsModule } from '@angular/forms';
+import { RecoverListComponent } from './recover-list/recover-list.component';
+import { ProfileComponent } from './profile/profile.component';
+import { ImagePickerComponent } from './components/image-picker/image-picker.component';
+import { ImageDisplayComponent } from './components/image-display/image-display.component';
+import { OrderListaPipe } from './vedi-lista/order-lista.pipe';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { WorldComponent } from './world/world.component';
+import { ManagePermissionComponent } from './components/manage-permission/manage-permission.component';
+import { PermissionsComponent } from './components/permissions/permissions.component';
+import { SwitchComponent } from './components/switch/switch.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    LoginComponent,
+    ListsComponent,
+    CreateListComponent,
+    SelfFocusDirective,
+    VediListaComponent,
+    NiceAlertComponent,
+    RegisterComponent,
+    RecoverComponent,
+    SettingsComponent,
+    ListFilter,
+    RecoverListComponent,
+    ProfileComponent,
+    ImagePickerComponent,
+    ImageDisplayComponent,
+    OrderListaPipe,
+    ChangePasswordComponent,
+    WorldComponent,
+    ManagePermissionComponent,
+    PermissionsComponent,
+    SwitchComponent
+  ],
+  imports: [
+    ReactiveFormsModule,
+    BrowserModule,
+    FormsModule,
+    HttpClientModule,
+    AppRoutingModule
+  ],
+  providers: [ManagerService],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }

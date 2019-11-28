@@ -1,0 +1,42 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.css";
+
+
+.btn {
+    font-family: Tahoma, sans-serif, Arial, Helvetica;
+    font-weight: bold;
+}
+
+body {
+    font-family: Tahoma, sans-serif, Arial, Helvetica;
+}
+
+.error{
+    color: red;
+    font-size: larger;
+    text-align: center;
+}
+
+.glyphicon-exclamation-sign{
+    color: blue;
+}
+.glyphicon-ok-sign{
+    color: green;
+}
+.glyphicon-remove-sign{
+    color: red;
+}
+
+input[type=checkbox]:focus {
+    outline:inherit;
+    border:inherit;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+}
+.coverAll {    
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 900;
+}

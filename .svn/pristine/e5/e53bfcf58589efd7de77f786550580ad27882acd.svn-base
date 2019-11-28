@@ -1,0 +1,51 @@
+    .outerSwitch {
+        width: 50px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        border: 1px solid #dfdfdf;
+        border-radius: 15px;
+        display: block;
+        position: relative;
+    }
+
+    span{        
+        height: 30px;
+    }
+
+    .commonProperties{        
+        position: absolute;
+        transition: left 0.5s;
+    }    
+    
+    .innerSwitchR {
+        width: 50px;
+        display: block;
+        left: 0;
+    }    
+    .switchedR{
+        left:50px;
+    }
+    
+    .innerSwitchL {
+        width: 50px;
+        display: block;
+        left: -60px;
+    }
+    .switchedL{
+        left:0;
+    }
+
+    
+    .innerSwitchM {
+        width: 30px;
+        display: block;
+        top: 0;
+        left: -5px;
+        z-index: 5;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .switchedM {
+        left:25px;
+    }

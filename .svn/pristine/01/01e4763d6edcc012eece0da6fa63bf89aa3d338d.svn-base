@@ -1,0 +1,33 @@
+h1 {
+    text-align: center;
+}
+
+.centeredSquare{
+    max-width: 500px;
+    margin:auto;
+    /* padding: 0 15px 10px 15px;
+    border: solid black 1px;
+    text-align: center; */
+}
+
+.container-fluid{
+    max-width: 500px;
+}
+
+button {
+    margin: auto;
+    width:200px;
+}
+
+.error{
+    color: red;
+    font-size: larger;
+    text-align: center;
+}
+
+/* input {
+    display: block;
+    margin:10px auto;
+    width: 200px;
+    text-align: center;
+} */

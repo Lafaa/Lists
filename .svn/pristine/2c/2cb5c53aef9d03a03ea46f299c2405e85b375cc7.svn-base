@@ -1,0 +1,49 @@
+import { Component, OnInit } from '@angular/core';
+import { ManagerService } from '../manager.service';
+import { ServerResponse, UserInfo } from '../model';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+
+@Component({
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
+})
+export class ProfileComponent implements OnInit {
+  userInfo: UserInfo = new UserInfo();
+  display = false;
+  name: string = "";  
+  yours: boolean = true;
+
+  constructor(private router: Router, public ms: ManagerService, private location: Location) { }
+
+  ngOnInit() {
+    if(this.ms.getUser()){
+      this.name = this.ms.getUser();
+      if(this.ms.userInfo != undefined)
+        this.userInfo = this.ms.userInfo;
+      else
+      this.ms.getUserInfos(this.name).subscribe((response: ServerResponse) => {
+        if (response.esito === 0) 
+          this.ms.userInfo = this.userInfo = new UserInfo(response.data.lists, 
+              response.data.groups, response.data.icon != null ? response.data.icon : 0);
+      });
+    }
+    else
+      this.router.navigate(['/home']);
+
+  }
+
+  selectIcon(icon: number) {
+    this.userInfo.icon = icon;
+    this.ms.saveAvatar(icon).subscribe();
+  }
+
+  close(event: Event) {
+    this.display = false;
+  }
+  dontClose(event: Event) {
+    event.stopPropagation();
+  }
+
+}

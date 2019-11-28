@@ -1,0 +1,69 @@
+<div class="outerBlue">
+  <div class="innerBlue" [class.innerBlueBigger]="resetting===true">
+    <img *ngIf="resetting===null" class="spinner">
+
+    <div *ngIf="resetting===false">
+      <h1>
+        Recupera password
+      </h1>
+      <div class="container-fluid">
+        <form [formGroup]='recoverForm' (submit)="recoverPassword()">
+          <div class="form-group has-feedback">
+            <label>Email</label>
+            <input class="form-control" type="email" formControlName="email" placeholder="Email" />
+            <i class="glyphicon form-control-feedback" [appSelfFocus]='true' [class.glyphicon-exclamation-sign]="recoverForm.get('email').pristine"
+              [class.glyphicon-ok-sign]="recoverForm.get('email').valid" [class.glyphicon-remove-sign]="recoverForm.get('email').invalid && recoverForm.get('email').dirty"></i>
+            <p class="error" *ngIf="recoverForm.get('email').hasError('invalidEmail') && recoverForm.get('email').dirty">Formato email non valido</p>
+            <p class="error" *ngIf="recoverForm.get('email').hasError('required') && recoverForm.get('email').dirty">Devi inserire un indirizzo email</p>
+          </div>
+          <p>Inserisci l'email con cui ti sei registrato per ricevere una nuova password</p>
+          <button [disabled]="recoverForm.invalid" class="btn btn-primary pull-left">Conferma</button>
+        </form>
+        <button (click)="back()" class="btn btn-danger pull-right">Back</button>
+      </div>
+    </div>
+
+    <div *ngIf="resetting===true">
+        <h1>
+          Reset password
+        </h1>
+        <div class="container-fluid">
+          <form [formGroup]='recoverForm' (submit)="resetPassword()">
+              <div class="form-group has-feedback">
+                  <label>Nuova Password</label>
+                  <input type="password" 
+                    class="form-control"
+                    formControlName="password"
+                    placeholder="Choose a password">
+                    <i class="glyphicon form-control-feedback"
+                    [class.glyphicon-exclamation-sign]="recoverForm.get('password').pristine"
+                    [class.glyphicon-ok-sign]="recoverForm.get('password').valid"
+                    [class.glyphicon-remove-sign]="recoverForm.get('password').invalid && recoverForm.get('password').dirty"
+                    ></i>
+                    <p *ngIf="recoverForm.get('password').hasError('minlength') && recoverForm.get('password').dirty">La password deve essere lunga almeno 5 caratteri</p>        
+                    <p *ngIf="recoverForm.get('password').hasError('required') && recoverForm.get('password').dirty">Devi scegliere una password</p>        
+                    
+                </div>
+                <div class="form-group has-feedback">
+                  <label>Conferma Password</label>
+                  <input type="password" 
+                    class="form-control"
+                    formControlName="password2"
+                    placeholder="Confirm your password">
+                    <i class="glyphicon form-control-feedback"
+                    [class.glyphicon-exclamation-sign]="recoverForm.get('password2').pristine"
+                    [class.glyphicon-ok-sign]="recoverForm.get('password2').valid"
+                    [class.glyphicon-remove-sign]="recoverForm.get('password2').invalid && recoverForm.get('password2').dirty"
+                    ></i>
+                    <p *ngIf="recoverForm.get('password2').hasError('differentPassword') && recoverForm.get('password2').dirty">Le password non coincidono</p>
+                    <p *ngIf="recoverForm.get('password2').hasError('required') && recoverForm.get('password2').dirty">Devi confermare la password</p>
+                </div>
+            <p>Scegli la tua nuova password</p>
+            <button [disabled]="recoverForm.invalid" class="btn btn-primary pull-left">Conferma</button>
+          </form>
+          <button (click)="back()" class="btn btn-danger pull-right">Back</button>
+        </div>
+      </div>
+    
+  </div>
+</div>

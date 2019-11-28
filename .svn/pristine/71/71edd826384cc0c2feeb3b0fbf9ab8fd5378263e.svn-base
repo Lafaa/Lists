@@ -1,0 +1,15 @@
+<div class="homeContent">
+  <div *ngFor="let lista of liste; let i=index" class="lista">
+    <div>
+      <app-image-display [icon]="lista.icon"></app-image-display>
+    </div>
+    <div class="titleDesc">
+      <h3>{{lista.name}}</h3>
+      <p>{{lista.desc}}</p>
+      <button class="btn btn-primary" [routerLink]="['/home/vedi-lista',lista.id]">Vedi</button>
+    </div>
+  </div>
+  <div *ngIf="liste.length==0" style="text-align:center">
+    <h3>Nessuna lista pubblica...per ora!</h3>
+  </div>
+</div>

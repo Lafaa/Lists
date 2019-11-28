@@ -1,0 +1,56 @@
+span {
+    top: 5px;
+    right: 5px;
+    position: absolute;
+    color: red;
+}
+
+app-image-display{
+    margin: 0;
+}
+
+span, img{    
+    cursor: pointer;
+}
+
+span:hover{
+    color:#770b0b;
+}
+
+.outer {    
+    top: 0;
+    left: 0;
+    background-color: rgba(134, 134, 134, 0.31);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+img {
+    width: 100px;
+    height: 100px;
+    margin:5px;
+}
+
+.meme{
+    border:1px solid black;
+    display: inline-flex;
+}
+
+.imagePicker{
+    border: 1px solid black;
+    height: 80vh;
+    width: 80vw;
+    position: absolute;
+    top: 10vh;
+    left: 10vw;
+    background-color: white;
+    text-align: center;
+    overflow-x: hidden; 
+    box-shadow: #525252 0px 0px 20px;
+}
+
+img:hover {
+    background-color: lightgrey;
+}

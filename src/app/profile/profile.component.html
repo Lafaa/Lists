@@ -1,0 +1,18 @@
+  <div class="row">
+    <div class="col-xs-7">
+      <app-image-picker [big]="true" [icon]="userInfo.icon" (iconSelected)="selectIcon($event)"></app-image-picker>
+    </div>
+    <div class="col-xs-5">
+      <h3>{{name}}</h3>
+      <div *ngIf="yours">        
+      </div>
+    </div>
+  </div>
+  <p>Liste Pubbliche</p>
+  <app-permissions [names]="userInfo.lists" [editable]="false"></app-permissions>
+  <p>Gruppi</p>
+  <app-permissions [names]="userInfo.groups" (saved)="save($event, 1)" [reduceOnly]="true"></app-permissions>
+  <p>Liste che puoi leggere</p>
+  <app-permissions [names]="userInfo.read" (saved)="save($event, 2)" [reduceOnly]="true"></app-permissions>
+  <p>Liste che puoi modificare</p>
+  <app-permissions [names]="userInfo.write" (saved)="save($event, 3)" [reduceOnly]="true"></app-permissions>

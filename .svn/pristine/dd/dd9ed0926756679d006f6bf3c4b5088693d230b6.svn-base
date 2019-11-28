@@ -1,0 +1,51 @@
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ManagerService } from "../manager.service";
+import { ServerResponse } from '../model';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class HomeComponent implements OnInit {
+
+  constructor(private ms: ManagerService, private router: Router) {
+  }
+
+  viewSelf(){
+    this.ms.ProfiloView.emit(this.ms.getUser());
+  }
+
+  ngOnInit() {
+    if (!this.ms.fromLogin && this.ms.getUser() === '')
+      this.ms.tryToRecoverSession().then((data:any)=> {
+        if (!data){
+          this.router.navigate(['/']);
+          this.ms.sessioneScaduta();
+        }
+          
+      });
+    else {
+      this.ms.getListe();
+    }
+  }
+
+  logOut() {
+    if (confirm('Sicuro di voler uscire?')) {
+      this.ms.logout();
+      this.router.navigate(['/']);
+    }
+  }
+
+  settings() {
+    this.router.navigate(['/', 'home', 'settings']);
+  }
+
+  profile() {
+    this.router.navigate(['/', 'home', 'profile']);
+
+  }
+
+
+}

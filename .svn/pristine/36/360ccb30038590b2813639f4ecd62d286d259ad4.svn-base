@@ -1,0 +1,38 @@
+import { Component, OnInit } from '@angular/core';
+import { ListaInfo, ServerResponse } from '../model';
+import { ManagerService } from '../manager.service';
+import { Router } from '@angular/router';
+@Component({
+  selector: 'app-lists',
+  templateUrl: './lists.component.html',
+  styleUrls: ['./lists.component.css']
+})
+export class ListsComponent implements OnInit {
+
+  liste:Array<ListaInfo>=[];
+  editingList:number;
+  private adding=false;
+  constructor(private ms:ManagerService, private router:Router) { 
+    this.liste=ms.liste;
+  }
+
+  ngOnInit() {
+  }
+
+  deleteList(i:number){
+    if (confirm('Sei sicuro di voler cancellare la lista '+this.liste[i].name+"?"))
+      this.ms.deleteList(i).subscribe((response:ServerResponse)=>{
+        if (response.esito===0){
+          this.ms.liste.splice(i,1);
+          this.ms.AlertEmitter.emit({msg:'Lista cancellata con successo', color:'lightblue'})
+        }
+        else if (response.esito===1){
+            if (response.messaggio === 'SESSIONEXPIRED'){
+              this.ms.AlertEmitter.emit({msg:'Sessione scaduta, effettua di nuovo il login', color:'red'});
+              this.router.navigate(['/']);
+            }
+          }
+      }); 
+  }
+
+}

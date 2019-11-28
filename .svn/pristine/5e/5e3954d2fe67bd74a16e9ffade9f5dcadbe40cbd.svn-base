@@ -1,0 +1,30 @@
+<div class="permissionContainer">
+  <div class="wellDT" *ngIf="!editing">
+    <span *ngFor="let name of names; let i=index">{{name}};
+    </span>
+  </div>
+  <div class="wellDT" *ngIf="editing">
+    <span *ngFor="let name of names; let i=index">{{name}} 
+      <span class="glyphicon glyphicon-minus-sign" *ngIf="editing" (click)="delete(i)"></span>
+    </span>
+    <div class="form-group">
+    <input type="text" [(ngModel)]="addedName" class="form-control">
+    <span class="glyphicon glyphicon-plus" *ngIf="editing" (click)="add()"></span>
+  </div>
+  </div>
+
+  <button class="btn btn-warning" *ngIf="!editing" (click)="edit()">
+    <span class="glyphicon glyphicon-pencil"></span>
+  </button>
+  <div *ngIf="editing" style="display:inline">
+    <button class="btn btn-success" (click)="save()">
+      <span class="glyphicon glyphicon-ok"></span>
+    </button>
+    <button class="btn btn-danger" (click)="cancel()">
+      <span class="glyphicon glyphicon-remove"></span>
+    </button>
+  </div>
+
+
+
+</div>
